@@ -1,0 +1,16 @@
+load("//shared/bazel/rules:java_rules.bzl", "wpilib_java_junit5_test")
+
+wpilib_java_junit5_test(
+    name = "apriltag-test",
+    size = "small",
+    srcs = glob(["*.java"]),
+    resource_strip_prefix = "apriltag/src/test/resources",
+    resources = ["//apriltag/src/test/resources"],
+    deps = [
+        "@bazelrio//libraries/java/opencv",
+        "//wpiutil/src/main/java/edu/wpi/first/util:wpiutil",
+        "//wpimath/src/main/java/edu/wpi/first/math:wpimath",
+        "//apriltag/src/main/java/edu/wpi/first/apriltag",
+        "@maven//:com_fasterxml_jackson_core_jackson_databind",
+    ],
+)
