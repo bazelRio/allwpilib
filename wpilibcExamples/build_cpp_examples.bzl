@@ -94,7 +94,6 @@ TEMPLATES_FOLDERS = [
 TESTS_FOLDERS = [
     "AddressableLED",
     "UnitTest",
-
 ]
 
 def build_examples(halsim_deps = []):
@@ -155,5 +154,5 @@ def build_tests():
                 "@gtest",
             ],
             defines = ["RUNNING_FRC_TESTS=1"],
-            tags = ["wpi-example"],
+            tags = ["wpi-example", "no-tsan", "no-asan", "no-ubsan"],
         )

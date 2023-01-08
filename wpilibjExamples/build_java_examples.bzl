@@ -1,5 +1,4 @@
-load("//shared/bazel/rules:java_rules.bzl", "wpilib_java_binary", "wpilib_java_library")
-load("//shared/bazel/rules:java_rules.bzl", "wpilib_java_junit5_test")
+load("//shared/bazel/rules:java_rules.bzl", "wpilib_java_binary", "wpilib_java_junit5_test", "wpilib_java_library")
 
 EXAMPLES_FOLDERS = [
     "addressableled",

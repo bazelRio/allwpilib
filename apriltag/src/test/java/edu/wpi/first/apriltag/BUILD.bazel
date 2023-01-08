@@ -7,10 +7,10 @@ wpilib_java_junit5_test(
     resource_strip_prefix = "apriltag/src/test/resources",
     resources = ["//apriltag/src/test/resources"],
     deps = [
-        "@bazelrio//libraries/java/opencv",
-        "//wpiutil/src/main/java/edu/wpi/first/util:wpiutil",
-        "//wpimath/src/main/java/edu/wpi/first/math:wpimath",
         "//apriltag/src/main/java/edu/wpi/first/apriltag",
+        "//wpimath/src/main/java/edu/wpi/first/math:wpimath",
+        "//wpiutil/src/main/java/edu/wpi/first/util:wpiutil",
+        "@bazelrio//libraries/java/opencv",
         "@maven//:com_fasterxml_jackson_core_jackson_databind",
     ],
 )

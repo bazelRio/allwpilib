@@ -11,9 +11,9 @@ http_archive(
 # Download BazelRio <3
 http_archive(
     name = "bazelrio",
-    url = "https://github.com/pjreiniger/bazelRio/archive/e1519838743bab8eb1c16cfa4331c95848664ce2.tar.gz",
     sha256 = "4ddbac21a195a35e955cc4bc2a66bf7cee0d691dd84a4c00e45c771d1c72d2f1",
     strip_prefix = "bazelrio-e1519838743bab8eb1c16cfa4331c95848664ce2/bazelrio",
+    url = "https://github.com/pjreiniger/bazelRio/archive/e1519838743bab8eb1c16cfa4331c95848664ce2.tar.gz",
 )
 
 # Download Extra java rules
@@ -31,6 +31,7 @@ http_archive(
 load("@bazelrio//:deps.bzl", "setup_bazelrio_dependencies")
 
 setup_bazelrio_dependencies(
+    apriltaglib_version = "3.2.0-3",
     imgui_version = "1.89.1-1",
     libssh_version = "0.95-6",
     navx_version = None,
@@ -40,7 +41,6 @@ setup_bazelrio_dependencies(
     revlib_version = None,
     toolchain_versions = "2023-7",
     wpilib_version = None,
-    apriltaglib_version = "3.2.0-3",
 )
 
 load("//shared/bazel/deps:repo.bzl", "load_third_party")
