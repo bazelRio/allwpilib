@@ -3,7 +3,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Rules Python
 http_archive(
     name = "rules_python",
-    sha256 = "5fa3c738d33acca3b97622a13a741129f67ef43f5fdfcec63b29374cc0574c29",
+    sha256 = "7d83768e703e858883222360421ab38ed28fca318a505c24660b4ec2b9f43058",
     strip_prefix = "rules_python-0.9.0",
     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.9.0.tar.gz",
 )
@@ -11,9 +11,9 @@ http_archive(
 # Download BazelRio <3
 http_archive(
     name = "bazelrio",
-    sha256 = "4ddbac21a195a35e955cc4bc2a66bf7cee0d691dd84a4c00e45c771d1c72d2f1",
-    strip_prefix = "bazelrio-e1519838743bab8eb1c16cfa4331c95848664ce2/bazelrio",
-    url = "https://github.com/pjreiniger/bazelRio/archive/e1519838743bab8eb1c16cfa4331c95848664ce2.tar.gz",
+    sha256 = "a080074a63d826cb8adc13eda84eb3551a1c3ab19fe754c2a003b6812c26497c",
+    strip_prefix = "bazelRio-0f6ee5d9b5752b596f45eefc3c03c16897fca461/bazelrio",
+    url = "https://github.com/bazelRio/bazelRio/archive/0f6ee5d9b5752b596f45eefc3c03c16897fca461.tar.gz",
 )
 
 # Download Extra java rules
