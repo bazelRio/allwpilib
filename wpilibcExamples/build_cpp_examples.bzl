@@ -27,7 +27,7 @@ EXAMPLE_FOLDERS = [
     "Gyro",
     "GyroDriveCommands",
     "GyroMecanum",
-    "HAL",
+    # "HAL",
     "HatchbotInlined",
     "HatchbotTraditional",
     "HidRumble",
