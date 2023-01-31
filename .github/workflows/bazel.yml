@@ -52,7 +52,7 @@ jobs:
       matrix:
         include:
           - { container: "wpilib/ubuntu-base:22.04", artifact-name: "Linux Release", config: "" }
-          - { container: "wpilib/ubuntu-base:22.04", artifact-name: "Linux Release", config: "--config=enable_bzlmod" }
+          - { container: "wpilib/ubuntu-base:22.04", artifact-name: "Linux Release", config: "--enable_bzlmod" }
     runs-on: ubuntu-latest
     name: "Build - ${{ matrix.artifact-name }}${{ matrix.architecture }}"
     container: ${{ matrix.container }}
