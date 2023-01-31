@@ -11,7 +11,7 @@ http_archive(
 # Download BazelRio <3
 http_archive(
     name = "bazelrio",
-    sha256 = "a080074a63d826cb8adc13eda84eb3551a1c3ab19fe754c2a003b6812c26497c",
+    sha256 = "1a02e98b5940f20edfbb6aae4acf80facc3c9161f1c5d4453cd9ce9648983ad9",
     strip_prefix = "bazelRio-0f6ee5d9b5752b596f45eefc3c03c16897fca461/bazelrio",
     url = "https://github.com/bazelRio/bazelRio/archive/0f6ee5d9b5752b596f45eefc3c03c16897fca461.tar.gz",
 )
