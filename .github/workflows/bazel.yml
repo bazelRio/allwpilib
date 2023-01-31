@@ -131,7 +131,7 @@ jobs:
       - name: Install Buildifier
         run: |
           cd $(mktemp -d)
-          GO111MODULE=on go get github.com/bazelbuild/buildtools/buildifier@5.1.0
+          GO111MODULE=on go get github.com/bazelbuild/buildtools/buildifier@6.0.0
 
       - uses: actions/checkout@v3
         with: { fetch-depth: 0 }
