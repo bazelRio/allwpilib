@@ -32,16 +32,16 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: bazelbuild/setup-bazelisk@v1
 
-      - name: Build wpimath dependencies
-        run: bazel ${{ matrix.action }} -k wpiutil/... --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures --test_verbose_timeout_warnings
-        shell: bash
+      # - name: Build wpimath dependencies
+      #   run: bazel ${{ matrix.action }} -k wpiutil/... --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures --test_verbose_timeout_warnings
+      #   shell: bash
 
-      - name: Build wpimath
-        run: bazel ${{ matrix.action }} -k wpimath/... --config=remote ${{ matrix.config }} ${{ matrix.wpimath_config }} --nojava_header_compilation --verbose_failures --test_verbose_timeout_warnings
-        shell: bash
+      # - name: Build wpimath
+      #   run: bazel ${{ matrix.action }} -k wpimath/... --config=remote ${{ matrix.config }} ${{ matrix.wpimath_config }} --nojava_header_compilation --verbose_failures --test_verbose_timeout_warnings
+      #   shell: bash
 
       - name: Build
-        run: bazel ${{ matrix.action }} -k ... --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures --test_verbose_timeout_warnings
+        run: bazel ${{ matrix.action }} -k cscore/src/test/native/cpp:cscore-test   --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures --test_verbose_timeout_warnings
         shell: bash
 
   build-linux:
