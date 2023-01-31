@@ -13,11 +13,13 @@ jobs:
       matrix:
         include:
           - { os: windows-2022, action: "test", config: "--config=windows", wpimath_config: "--local_cpu_resources=1" }
+          - { os: windows-2022, action: "test", config: "--config=windows --enable_bzlmod", wpimath_config: "--local_cpu_resources=1" }
 #          - { os: windows-2022, config: "--config=roborio" }
 #          - { os: windows-2022, config: "--config=bionic" }
 #          - { os: windows-2022, config: "--config=raspbian" }
 
           - { os: macos-latest,   action: "test", config: "--config=osx -c opt --config=no_example", wpimath_config: "" }
+          - { os: macos-latest,   action: "test", config: "--config=osx -c opt --config=no_example --enable_bzlmod", wpimath_config: "" }
 #          - { os: macos-latest, config: "--config=roborio" }
 #          - { os: macos-latest, config: "--config=bionic" }
 #          - { os: macos-latest, config: "--config=raspbian" }
@@ -49,8 +51,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: wpilib/ubuntu-base:22.04
-            artifact-name: Linux Release
+          - { container: "wpilib/ubuntu-base:22.04", artifact-name: "Linux Release", config: "" }
+          - { container: "wpilib/ubuntu-base:22.04", artifact-name: "Linux Release", config: "--config=enable_bzlmod" }
     runs-on: ubuntu-latest
     name: "Build - ${{ matrix.artifact-name }}${{ matrix.architecture }}"
     container: ${{ matrix.container }}
@@ -60,7 +62,7 @@ jobs:
       - uses: bazelbuild/setup-bazelisk@v1
 
       - name: Build and Test
-        run: bazel test ... --config=remote --config=linux -k --verbose_failures --test_verbose_timeout_warnings
+        run: bazel test ... --config=remote --config=linux ${{ matrix.config }} -k --verbose_failures --test_verbose_timeout_warnings
 
 
   repin-maven:
