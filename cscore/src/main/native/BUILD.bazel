@@ -1,6 +1,6 @@
 load("//shared/bazel/rules:cc_rules.bzl", "wpilib_cc_static_and_shared_library")
-load("//shared/bazel/rules/jni:cc_jni.bzl", "wpilib_jni_cc_library")
 load("//shared/bazel/rules:objectivec_rules.bzl", "wpilib_objc_library")
+load("//shared/bazel/rules/jni:cc_jni.bzl", "wpilib_jni_cc_library")
 
 WIN_SRCS = glob([
     "windows/**/*.cpp",
