@@ -34,6 +34,7 @@ wpilib_objc_library(
         "//wpiutil/src/main/native:wpiutil.static",
     ],
     includes = [
+        "cpp",
         "include",
         "objcpp",
     ],
