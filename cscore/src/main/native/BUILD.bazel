@@ -25,18 +25,23 @@ filegroup(
 
 wpilib_objc_library(
     name = "cscore-mac",
-    srcs = glob(["objcpp/**/*.mm", "cpp/*.h"]),
+    srcs = glob([
+        "objcpp/**/*.mm",
+        "cpp/*.h",
+    ]),
     hdrs = glob([
         "include/**/*",
         "objcpp/**/*.h",
     ]),
-    deps = [
-        "//wpiutil/src/main/native:wpiutil.static",
-    ],
     includes = [
         "cpp",
         "include",
         "objcpp",
+    ],
+    deps = [
+        "//wpinet/src/main/native:wpinet.static",
+        "//wpiutil/src/main/native:wpiutil.static",
+        "@bazelrio//libraries/cpp/opencv",
     ],
 )
 
