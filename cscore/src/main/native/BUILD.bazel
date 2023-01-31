@@ -25,7 +25,7 @@ filegroup(
 
 wpilib_objc_library(
     name = "cscore-mac",
-    srcs = glob(["objcpp/**/*.mm"]),
+    srcs = glob(["objcpp/**/*.mm", "cpp/*.h"]),
     hdrs = glob([
         "include/**/*",
         "objcpp/**/*.h",
