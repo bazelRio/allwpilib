@@ -43,7 +43,7 @@ jobs:
         shell: bash
 
       - name: Build wpimath
-        run: bazel build -k wpimath/... --config=remote ${{ matrix.config }} ${{ matrix.wpimath_config }} --nojava_header_compilation --verbose_failures --test_verbose_timeout_warnings
+        run: bazel build -k wpimath/... --config=remote ${{ matrix.config }} ${{ matrix.wpimath_config }} --nojava_header_compilation --verbose_failures
         shell: bash
 
       - name: Build
