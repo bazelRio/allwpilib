@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 1,
-  "moduleFileHash": "c580286a3e29ec94cd0712a6d9402940963c85d4ee3ba11d1228629d700f09fc",
+  "moduleFileHash": "6880f21a0001f48293eb1d519cc108abaf2c184288e1de37dc5506858e0f6ca5",
   "flags": {
     "cmdRegistries": [
       "https://raw.githubusercontent.com/pjreiniger/bazel-central-registry/bzlmodrio/"
@@ -32,7 +32,7 @@
           "usingModule": "\u003croot\u003e",
           "location": {
             "file": "\u003croot\u003e/MODULE.bazel",
-            "line": 19,
+            "line": 31,
             "column": 22
           },
           "imports": {
@@ -46,7 +46,7 @@
               "devDependency": false,
               "location": {
                 "file": "\u003croot\u003e/MODULE.bazel",
-                "line": 20,
+                "line": 32,
                 "column": 14
               }
             }
@@ -58,7 +58,7 @@
           "usingModule": "\u003croot\u003e",
           "location": {
             "file": "\u003croot\u003e/MODULE.bazel",
-            "line": 50,
+            "line": 62,
             "column": 20
           },
           "imports": {
@@ -72,7 +72,7 @@
               "devDependency": false,
               "location": {
                 "file": "\u003croot\u003e/MODULE.bazel",
-                "line": 51,
+                "line": 63,
                 "column": 10
               }
             }
@@ -84,7 +84,7 @@
           "usingModule": "\u003croot\u003e",
           "location": {
             "file": "\u003croot\u003e/MODULE.bazel",
-            "line": 57,
+            "line": 69,
             "column": 23
           },
           "imports": {
@@ -98,7 +98,7 @@
               "devDependency": false,
               "location": {
                 "file": "\u003croot\u003e/MODULE.bazel",
-                "line": 58,
+                "line": 70,
                 "column": 17
               }
             }
@@ -113,12 +113,13 @@
         "rules_python": "rules_python@0.21.0",
         "gtest": "googletest@1.12.1",
         "rules_jvm_external": "rules_jvm_external@5.2",
+        "rules_bzlmodrio_toolchains": "rules_bzlmodrio_toolchains@2023-7",
         "bzlmodrio-apriltaglib": "bzlmodrio-apriltaglib@3.2.0-3",
         "bzlmodrio-imgui": "bzlmodrio-imgui@1.89.1-1",
         "bzlmodrio-libssh": "bzlmodrio-libssh@0.95-6",
         "bzlmodrio-ni": "bzlmodrio-ni@2023.3.0",
         "bzlmodrio-opencv": "bzlmodrio-opencv@4.6.0-4",
-        "rules_bzlmodrio_toolchains": "rules_bzlmodrio_toolchains@2023-7"
+        "rules_bazelrio": "rules_bazelrio@0.0.10"
       }
     },
     "bazel_tools@_": {
@@ -528,6 +529,85 @@
         "attributes": {"name":"--rules_jvm_external~5.2","urls":["--https://github.com/bazelbuild/rules_jvm_external/releases/download/5.2/rules_jvm_external-5.2.tar.gz"],"integrity":"--sha256-+G/UKoCeGHHKCqvonbDUQEUSGcPORsWNokDH3NwAEl8=","strip_prefix":"--rules_jvm_external-5.2","remote_patches":{},"remote_patch_strip":0}
       }
     },
+    "rules_bzlmodrio_toolchains@2023-7": {
+      "name": "rules_bzlmodrio_toolchains",
+      "version": "2023-7",
+      "key": "rules_bzlmodrio_toolchains@2023-7",
+      "repoName": "rules_bzlmodrio_toolchains",
+      "executionPlatformsToRegister": [],
+      "toolchainsToRegister": [
+        "@local_bullseye_32//:macos",
+        "@local_bullseye_32//:linux",
+        "@local_bullseye_32//:windows",
+        "@local_bullseye_64//:macos",
+        "@local_bullseye_64//:linux",
+        "@local_bullseye_64//:windows",
+        "@local_raspi_32//:macos",
+        "@local_raspi_32//:linux",
+        "@local_raspi_32//:windows",
+        "@local_roborio//:macos",
+        "@local_roborio//:linux",
+        "@local_roborio//:windows"
+      ],
+      "extensionUsages": [
+        {
+          "extensionBzlFile": "@rules_bzlmodrio_toolchains//:maven_deps.bzl",
+          "extensionName": "deps",
+          "usingModule": "rules_bzlmodrio_toolchains@2023-7",
+          "location": {
+            "file": "rules_bzlmodrio_toolchains@2023-7/MODULE.bazel",
+            "line": 11,
+            "column": 21
+          },
+          "imports": {
+            "bazelrio_bullseye_32_toolchain_linux": "bazelrio_bullseye_32_toolchain_linux",
+            "bazelrio_bullseye_32_toolchain_macos": "bazelrio_bullseye_32_toolchain_macos",
+            "bazelrio_bullseye_32_toolchain_windows": "bazelrio_bullseye_32_toolchain_windows",
+            "bazelrio_bullseye_64_toolchain_linux": "bazelrio_bullseye_64_toolchain_linux",
+            "bazelrio_bullseye_64_toolchain_macos": "bazelrio_bullseye_64_toolchain_macos",
+            "bazelrio_bullseye_64_toolchain_windows": "bazelrio_bullseye_64_toolchain_windows",
+            "bazelrio_raspi_32_toolchain_linux": "bazelrio_raspi_32_toolchain_linux",
+            "bazelrio_raspi_32_toolchain_macos": "bazelrio_raspi_32_toolchain_macos",
+            "bazelrio_raspi_32_toolchain_windows": "bazelrio_raspi_32_toolchain_windows",
+            "bazelrio_roborio_toolchain_linux": "bazelrio_roborio_toolchain_linux",
+            "bazelrio_roborio_toolchain_macos": "bazelrio_roborio_toolchain_macos",
+            "bazelrio_roborio_toolchain_windows": "bazelrio_roborio_toolchain_windows"
+          },
+          "devImports": [],
+          "tags": []
+        },
+        {
+          "extensionBzlFile": "@rules_bzlmodrio_toolchains//:extensions.bzl",
+          "extensionName": "sh_configure",
+          "usingModule": "rules_bzlmodrio_toolchains@2023-7",
+          "location": {
+            "file": "rules_bzlmodrio_toolchains@2023-7/MODULE.bazel",
+            "line": 28,
+            "column": 29
+          },
+          "imports": {
+            "local_bullseye_32": "local_bullseye_32",
+            "local_bullseye_64": "local_bullseye_64",
+            "local_raspi_32": "local_raspi_32",
+            "local_roborio": "local_roborio"
+          },
+          "devImports": [],
+          "tags": []
+        }
+      ],
+      "deps": {
+        "bazel_tools": "bazel_tools@_",
+        "local_config_platform": "local_config_platform@_",
+        "platforms": "platforms@0.0.6",
+        "rules_cc": "rules_cc@0.0.6",
+        "bazel_skylib": "bazel_skylib@1.4.1"
+      },
+      "repoSpec": {
+        "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "ruleClassName": "http_archive",
+        "attributes": {"name":"--rules_bzlmodrio_toolchains~2023-7","urls":["--https://github.com/bzlmodRio/rules_bzlmodrio_toolchains/releases/download/2023-7/rules_bzlmodrio_toolchains-2023-7.tar.gz"],"integrity":"--sha256-HFZjWPl7CTkW4VDeELZdZSetJo5b2LwKCov9BLOQdRo=","strip_prefix":"--","remote_patches":{},"remote_patch_strip":0}
+      }
+    },
     "bzlmodrio-apriltaglib@3.2.0-3": {
       "name": "bzlmodrio-apriltaglib",
       "version": "3.2.0-3",
@@ -864,83 +944,51 @@
         "attributes": {"name":"--bzlmodrio-opencv~4.6.0-4","urls":["--https://github.com/bzlmodRio/bzlmodrio-opencv/releases/download/4.6.0-4/bzlmodrio-opencv-4.6.0-4.tar.gz"],"integrity":"--sha256-nilyXi+t39kyE6zGvfaEBqe2MMnwHDpsem4vEnavLY4=","strip_prefix":"--","remote_patches":{},"remote_patch_strip":0}
       }
     },
-    "rules_bzlmodrio_toolchains@2023-7": {
-      "name": "rules_bzlmodrio_toolchains",
-      "version": "2023-7",
-      "key": "rules_bzlmodrio_toolchains@2023-7",
-      "repoName": "rules_bzlmodrio_toolchains",
+    "rules_bazelrio@0.0.10": {
+      "name": "rules_bazelrio",
+      "version": "0.0.10",
+      "key": "rules_bazelrio@0.0.10",
+      "repoName": "rules_bazelrio",
       "executionPlatformsToRegister": [],
-      "toolchainsToRegister": [
-        "@local_bullseye_32//:macos",
-        "@local_bullseye_32//:linux",
-        "@local_bullseye_32//:windows",
-        "@local_bullseye_64//:macos",
-        "@local_bullseye_64//:linux",
-        "@local_bullseye_64//:windows",
-        "@local_raspi_32//:macos",
-        "@local_raspi_32//:linux",
-        "@local_raspi_32//:windows",
-        "@local_roborio//:macos",
-        "@local_roborio//:linux",
-        "@local_roborio//:windows"
-      ],
+      "toolchainsToRegister": [],
       "extensionUsages": [
         {
-          "extensionBzlFile": "@rules_bzlmodrio_toolchains//:maven_deps.bzl",
-          "extensionName": "deps",
-          "usingModule": "rules_bzlmodrio_toolchains@2023-7",
+          "extensionBzlFile": "@rules_jvm_external//:extensions.bzl",
+          "extensionName": "maven",
+          "usingModule": "rules_bazelrio@0.0.10",
           "location": {
-            "file": "rules_bzlmodrio_toolchains@2023-7/MODULE.bazel",
-            "line": 11,
-            "column": 21
+            "file": "rules_bazelrio@0.0.10/MODULE.bazel",
+            "line": 10,
+            "column": 22
           },
           "imports": {
-            "bazelrio_bullseye_32_toolchain_linux": "bazelrio_bullseye_32_toolchain_linux",
-            "bazelrio_bullseye_32_toolchain_macos": "bazelrio_bullseye_32_toolchain_macos",
-            "bazelrio_bullseye_32_toolchain_windows": "bazelrio_bullseye_32_toolchain_windows",
-            "bazelrio_bullseye_64_toolchain_linux": "bazelrio_bullseye_64_toolchain_linux",
-            "bazelrio_bullseye_64_toolchain_macos": "bazelrio_bullseye_64_toolchain_macos",
-            "bazelrio_bullseye_64_toolchain_windows": "bazelrio_bullseye_64_toolchain_windows",
-            "bazelrio_raspi_32_toolchain_linux": "bazelrio_raspi_32_toolchain_linux",
-            "bazelrio_raspi_32_toolchain_macos": "bazelrio_raspi_32_toolchain_macos",
-            "bazelrio_raspi_32_toolchain_windows": "bazelrio_raspi_32_toolchain_windows",
-            "bazelrio_roborio_toolchain_linux": "bazelrio_roborio_toolchain_linux",
-            "bazelrio_roborio_toolchain_macos": "bazelrio_roborio_toolchain_macos",
-            "bazelrio_roborio_toolchain_windows": "bazelrio_roborio_toolchain_windows"
+            "rules_bazelrio_maven": "rules_bazelrio_maven"
           },
           "devImports": [],
-          "tags": []
-        },
-        {
-          "extensionBzlFile": "@rules_bzlmodrio_toolchains//:extensions.bzl",
-          "extensionName": "sh_configure",
-          "usingModule": "rules_bzlmodrio_toolchains@2023-7",
-          "location": {
-            "file": "rules_bzlmodrio_toolchains@2023-7/MODULE.bazel",
-            "line": 28,
-            "column": 29
-          },
-          "imports": {
-            "local_bullseye_32": "local_bullseye_32",
-            "local_bullseye_64": "local_bullseye_64",
-            "local_raspi_32": "local_raspi_32",
-            "local_roborio": "local_roborio"
-          },
-          "devImports": [],
-          "tags": []
+          "tags": [
+            {
+              "tagName": "install",
+              "attributeValues": {"name":"--rules_bazelrio_maven","artifacts":["--com.hierynomus:sshj:0.32.0","--me.tongfei:progressbar:0.9.2","--net.sourceforge.argparse4j:argparse4j:0.9.0","--org.slf4j:slf4j-nop:1.7.32"],"repositories":["--https://repo1.maven.org/maven2"]},
+              "devDependency": false,
+              "location": {
+                "file": "rules_bazelrio@0.0.10/MODULE.bazel",
+                "line": 11,
+                "column": 14
+              }
+            }
+          ]
         }
       ],
       "deps": {
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_",
         "platforms": "platforms@0.0.6",
-        "rules_cc": "rules_cc@0.0.6",
-        "bazel_skylib": "bazel_skylib@1.4.1"
+        "rules_jvm_external": "rules_jvm_external@5.2"
       },
       "repoSpec": {
         "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
         "ruleClassName": "http_archive",
-        "attributes": {"name":"--rules_bzlmodrio_toolchains~2023-7","urls":["--https://github.com/bzlmodRio/rules_bzlmodrio_toolchains/releases/download/2023-7/rules_bzlmodrio_toolchains-2023-7.tar.gz"],"integrity":"--sha256-HFZjWPl7CTkW4VDeELZdZSetJo5b2LwKCov9BLOQdRo=","strip_prefix":"--","remote_patches":{},"remote_patch_strip":0}
+        "attributes": {"name":"--rules_bazelrio~0.0.10","urls":["--https://github.com/bzlmodRio/rules_bazelrio/releases/download/0.0.10/rules_bazelrio-0.0.10.tar.gz"],"integrity":"--sha256-N4yS5Q6fBKYAuJY9TT2rO9sHwe42DKrOo7TfDt6EtME=","strip_prefix":"--","remote_patches":{},"remote_patch_strip":0}
       }
     },
     "rules_license@0.0.3": {
@@ -1134,53 +1182,6 @@
         "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
         "ruleClassName": "http_archive",
         "attributes": {"name":"--stardoc~0.5.3","urls":["--https://github.com/bazelbuild/stardoc/releases/download/0.5.3/stardoc-0.5.3.tar.gz"],"integrity":"--sha256-P9j+xN3sPGcL2BCQTi4zFwvt/hL5Ct+UNQgYS+RYyLs=","strip_prefix":"--","remote_patches":{"--https://raw.githubusercontent.com/pjreiniger/bazel-central-registry/bzlmodrio/modules/stardoc/0.5.3/patches/module_dot_bazel.patch":"--sha256-Lgpy9OCr0zBWYuHoyM1rJJrgxn23X/bwgICEF7XiEug="},"remote_patch_strip":0}
-      }
-    },
-    "rules_bazelrio@0.0.10": {
-      "name": "rules_bazelrio",
-      "version": "0.0.10",
-      "key": "rules_bazelrio@0.0.10",
-      "repoName": "rules_bazelrio",
-      "executionPlatformsToRegister": [],
-      "toolchainsToRegister": [],
-      "extensionUsages": [
-        {
-          "extensionBzlFile": "@rules_jvm_external//:extensions.bzl",
-          "extensionName": "maven",
-          "usingModule": "rules_bazelrio@0.0.10",
-          "location": {
-            "file": "rules_bazelrio@0.0.10/MODULE.bazel",
-            "line": 10,
-            "column": 22
-          },
-          "imports": {
-            "rules_bazelrio_maven": "rules_bazelrio_maven"
-          },
-          "devImports": [],
-          "tags": [
-            {
-              "tagName": "install",
-              "attributeValues": {"name":"--rules_bazelrio_maven","artifacts":["--com.hierynomus:sshj:0.32.0","--me.tongfei:progressbar:0.9.2","--net.sourceforge.argparse4j:argparse4j:0.9.0","--org.slf4j:slf4j-nop:1.7.32"],"repositories":["--https://repo1.maven.org/maven2"]},
-              "devDependency": false,
-              "location": {
-                "file": "rules_bazelrio@0.0.10/MODULE.bazel",
-                "line": 11,
-                "column": 14
-              }
-            }
-          ]
-        }
-      ],
-      "deps": {
-        "bazel_tools": "bazel_tools@_",
-        "local_config_platform": "local_config_platform@_",
-        "platforms": "platforms@0.0.6",
-        "rules_jvm_external": "rules_jvm_external@5.2"
-      },
-      "repoSpec": {
-        "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
-        "ruleClassName": "http_archive",
-        "attributes": {"name":"--rules_bazelrio~0.0.10","urls":["--https://github.com/bzlmodRio/rules_bazelrio/releases/download/0.0.10/rules_bazelrio-0.0.10.tar.gz"],"integrity":"--sha256-N4yS5Q6fBKYAuJY9TT2rO9sHwe42DKrOo7TfDt6EtME=","strip_prefix":"--","remote_patches":{},"remote_patch_strip":0}
       }
     },
     "rules_pkg@0.7.0": {

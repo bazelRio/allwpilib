@@ -9,12 +9,24 @@ bazel_dep(name = "rules_java", version = "5.5.0")
 bazel_dep(name = "rules_python", version = "0.21.0")
 bazel_dep(name = "googletest", version = "1.12.1", repo_name = "gtest")
 bazel_dep(name = "rules_jvm_external", version = "5.2")
+bazel_dep(name = "rules_bzlmodrio_toolchains", version = "2023-7")
 bazel_dep(name = "bzlmodrio-apriltaglib", version = "3.2.0-3")
 bazel_dep(name = "bzlmodrio-imgui", version = "1.89.1-1")
 bazel_dep(name = "bzlmodrio-libssh", version = "0.95-6")
 bazel_dep(name = "bzlmodrio-ni", version = "2023.3.0")
 bazel_dep(name = "bzlmodrio-opencv", version = "4.6.0-4")
-bazel_dep(name = "rules_bzlmodrio_toolchains", version = "2023-7")
+bazel_dep(name = "rules_bazelrio", version = "0.0.10")
+
+# TODO temp
+# local_path_override(
+#     module_name = "bzlmodrio-opencv",
+#     path = "../bzlmodRio/monorepo/libraries/bzlmodRio-opencv",
+# )
+git_override(
+    module_name = "bzlmodrio",
+    commit = "413eb5f372d929dc4066f52d4a5f35acc76a86ea",
+    remote = "https://github.com/bzlmodRio/bzlmodRio",
+)
 
 maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 maven.install(
