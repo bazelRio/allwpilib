@@ -14,3 +14,6 @@ def wpilib_cc_static_and_shared_library(name, standard_deps = [], visibility = N
 
 def wpilib_cc_binary(name, **kwargs):
     cc_library(name = name, **kwargs)
+
+def wpilib_cc_test(name, **kwargs):
+    cc_test(name = name, **kwargs)
