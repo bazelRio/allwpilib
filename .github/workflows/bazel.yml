@@ -12,23 +12,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-2022, action: "test", config: "--config=windows" }
-          - { os: windows-2022, action: "test", config: "--config=windows --enable_bzlmod" }
-          # - { name: "Windows (bzlmod)",             os: windows-latest, action: "test", config: "--config=windows --enable_bzlmod",     wpimath_config: "--local_cpu_resources=1" }
+          - { name: "Windows (native)",             os: windows-2022, action: "test", config: "--config=windows" }
+          - { name: "Windows (bzlmod)",             os: windows-2022, action: "test", config: "--config=windows --enable_bzlmod" }
 
           - {  name: "Windows (roborio)",           os: windows-latest, action: "build", config: "--config=roborio" }
           - {  name: "Windows (roborio bzlmod)",    os: windows-latest, action: "build", config: "--config=roborio --enable_bzlmod" }
 
-          # - {  name: "Windows (bullseye32)",        os: windows-latest, action: "build", config: "--config=bullseye32" }
-          # - {  name: "Windows (bullseye32 bzlmod)", os: windows-latest, action: "build", config: "--config=bullseye32 --enable_bzlmod" }
+          - {  name: "Windows (bullseye32)",        os: windows-latest, action: "build", config: "--config=bullseye32" }
+          - {  name: "Windows (bullseye32 bzlmod)", os: windows-latest, action: "build", config: "--config=bullseye32 --enable_bzlmod" }
 
-          # - {  name: "Windows (bullseye64)",        os: windows-latest, action: "build", config: "--config=bullseye64" }
-          # - {  name: "Windows (bullseye64 bzlmod)", os: windows-latest, action: "build", config: "--config=bullseye64 --enable_bzlmod" }
+          - {  name: "Windows (bullseye64)",        os: windows-latest, action: "build", config: "--config=bullseye64" }
+          - {  name: "Windows (bullseye64 bzlmod)", os: windows-latest, action: "build", config: "--config=bullseye64 --enable_bzlmod" }
 
-          # - {  name: "Windows (raspi32)",           os: windows-latest, action: "build", config: "--config=raspi32" }
-          # - {  name: "Windows (raspi32 bzlmod)",    os: windows-latest, action: "build", config: "--config=raspi32 --enable_bzlmod" }
+          - {  name: "Windows (raspi32)",           os: windows-latest, action: "build", config: "--config=raspi32" }
+          - {  name: "Windows (raspi32 bzlmod)",    os: windows-latest, action: "build", config: "--config=raspi32 --enable_bzlmod" }
 
-    name: "Build Windows ${{ matrix.config }}"
+    name: "Build Windows ${{ matrix.name }}"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -40,19 +39,19 @@ jobs:
       - uses: bazelbuild/setup-bazelisk@v1
 
       - name: Build wpimath dependencies
-        run: bazel ${{ matrix.action }} -k wpiutil/... --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures
+        run: bazel --output_user_root=C:\\bazelroot ${{ matrix.action }} -k wpiutil/... --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures
         shell: bash
 
       - name: Build wpimath
-        run: bazel build -k wpimath/... --config=remote ${{ matrix.config }} --local_cpu_resources=1 --nojava_header_compilation --verbose_failures
+        run: bazel --output_user_root=C:\\bazelroot build -k wpimath/... --config=remote ${{ matrix.config }} --local_cpu_resources=1 --nojava_header_compilation --verbose_failures
         shell: bash
 
       - name: Build allowing failures
-        run: bazel build -k ...   --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures || true
+        run: bazel --output_user_root=C:\\bazelroot build -k ...   --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures || true
         shell: bash
 
       - name: Build
-        run: bazel ${{ matrix.action }} -k ...   --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures
+        run: bazel --output_user_root=C:\\bazelroot ${{ matrix.action }} -k ...   --config=remote ${{ matrix.config }} --nojava_header_compilation --verbose_failures
         shell: bash
 
   build-mac:

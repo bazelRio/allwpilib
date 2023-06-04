@@ -1,10 +1,143 @@
+module(
+    name = "allwpilib",
+    version = "2023.1.1",
+    compatibility_level = 2023,
+)
 
-bazel_dep(name = "bazel_skylib", version = "1.4.1")
+bazel_dep(name = "platforms", version = "0.0.6")
 bazel_dep(name = "rules_cc", version = "0.0.6")
 bazel_dep(name = "rules_java", version = "5.5.0")
-bazel_dep(name = "rules_python", version = "0.21.0")
+bazel_dep(name = "rules_python", version = "0.22.0")
 bazel_dep(name = "googletest", version = "1.12.1", repo_name = "gtest")
 bazel_dep(name = "rules_jvm_external", version = "5.2")
+bazel_dep(name = "bzlmodrio-apriltaglib", version = "3.2.0-3")
 bazel_dep(name = "bzlmodrio-imgui", version = "1.89.1-1")
+bazel_dep(name = "bzlmodrio-libssh", version = "0.95-6")
+bazel_dep(name = "bzlmodrio-ni", version = "2023.3.0")
 bazel_dep(name = "bzlmodrio-opencv", version = "4.6.0-4")
 bazel_dep(name = "rules_bzlmodrio_toolchains", version = "2023-7")
+
+git_override(
+    module_name = "rules_python",
+    commit = "afdbedd3a58cb5d65e659e1dcc77108cfd22715e",
+    remote = "https://github.com/bazelbuild/rules_python",
+    #https://github.com/bazelbuild/rules_python/commit/afdbedd3a58cb5d65e659e1dcc77108cfd22715e
+)
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    artifacts = [
+        "org.ejml:ejml-simple:0.41",
+        "com.fasterxml.jackson.core:jackson-annotations:2.12.4",
+        "com.fasterxml.jackson.core:jackson-core:2.12.4",
+        "com.fasterxml.jackson.core:jackson-databind:2.12.4",
+        "org.junit.jupiter:junit-jupiter-api:5.8.2",
+        "org.junit.jupiter:junit-jupiter-params:5.8.2",
+        "org.junit.jupiter:junit-jupiter-engine:5.8.2",
+        "org.junit.platform:junit-platform-commons:1.6.1",
+        "org.junit.platform:junit-platform-console:1.6.1",
+        "org.junit.platform:junit-platform-engine:1.6.1",
+        "org.junit.platform:junit-platform-launcher:1.6.1",
+        "org.junit.platform:junit-platform-suite-api:1.6.1",
+        "com.google.code.gson:gson:2.8.9",
+        "org.hamcrest:hamcrest-all:1.3",
+        "com.googlecode.junit-toolbox:junit-toolbox:2.4",
+        "org.apache.ant:ant:1.10.12",
+        "org.apache.ant:ant-junit:1.10.12",
+        "org.mockito:mockito-core:4.1.0",
+    ],
+    repositories = [
+        "https://repo1.maven.org/maven2",
+    ],
+)
+use_repo(
+    maven,
+    "maven",
+)
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+
+# This name is passed into python.toolchain and it's use_repo statement.
+# We also use the same name for python.host_python_interpreter.
+PYTHON_NAME = "python"
+
+INTERPRETER_NAME = "interpreter"
+
+# We next initialize the python toolchain using the extension.
+# You can set different Python versions in this block.
+python.toolchain(
+    name = PYTHON_NAME,
+    configure_coverage_tool = True,
+    is_default = True,
+    python_version = "3.9",
+)
+
+# The interpreter extension discovers the platform specific Python binary.
+# It creates a symlink to the binary, and we pass the label to the following
+# pip.parse call.
+interpreter = use_extension("@rules_python//python/extensions:interpreter.bzl", "interpreter")
+interpreter.install(
+    name = INTERPRETER_NAME,
+    python_name = PYTHON_NAME,
+)
+use_repo(interpreter, INTERPRETER_NAME)
+
+# Use the extension, pip.parse, to call the `pip_repository` rule that invokes
+# `pip`, with `incremental` set. The pip call accepts a locked/compiled
+# requirements file and installs the dependencies listed within.
+# Those dependencies become available in a generated `requirements.bzl` file.
+# You can instead check this `requirements.bzl` file into your repo.
+# Because this project has different requirements for windows vs other
+# operating systems, we have requirements for each.
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+# python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+#
+# # This name is passed into python.toolchain and it's use_repo statement.
+# # We also use the same name for python.host_python_interpreter.
+# PYTHON_NAME = "python3_9"
+#
+# python.toolchain(
+#     # This name is used in the various use_repo statements
+#     # below, and in the local extension that is in this
+#     # example.
+#     name = PYTHON_NAME,
+#     configure_coverage_tool = True,
+#     python_version = "3.9",
+# )
+#
+# use_repo(python, PYTHON_NAME, PYTHON_NAME + "_toolchains")
+#
+# register_toolchains(
+#     "@" + PYTHON_NAME + "_toolchains//:all",
+# )
+#
+# # The interpreter extension discovers the platform specific Python binary.
+# # It creates a symlink to the binary, and we pass the label to the following
+# # pip.parse call.
+# interpreter = use_extension("@rules_python//python/extensions:interpreter.bzl", "interpreter")
+# interpreter.install(
+#     name = "interpreter_" + PYTHON_NAME,
+#     python_name = PYTHON_NAME,
+# )
+# use_repo(interpreter, "interpreter_" + PYTHON_NAME)
+#
+# pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    name = "allwpilib_pip_deps",
+    # When using gazelle you must use set the following flag
+    # in order for the generation of gazelle dependency resolution.
+    incompatible_generate_aliases = True,
+    # The interpreter_target attribute points to the interpreter to
+    # use for running pip commands to download the packages in the
+    # requirements file.
+    # As a best practice, we use the same interpreter as the toolchain
+    # that was configured above; this ensures the same Python version
+    # is used for both resolving dependencies and running tests/binaries.
+    # If this isn't specified, then you'll get whatever is locally installed
+    # on your system.
+    python_interpreter_target = "@{}//:python".format(INTERPRETER_NAME),
+    # requirements_lock = "//:requirements_lock.txt",
+    requirements_lock = "//:requirements_lock.txt",
+)
+use_repo(pip, "allwpilib_pip_deps")
