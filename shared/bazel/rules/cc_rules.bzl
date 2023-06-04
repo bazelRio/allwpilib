@@ -6,8 +6,8 @@ def wpilib_cc_library(name, **kwargs):
     cc_library(name = name, **kwargs)
 
 
-def wpilib_cc_static_and_shared_library(name, standard_deps = [], visibility = None, **kwargs):
-    deps = standard_deps
+def wpilib_cc_static_and_shared_library(name, standard_deps = [], wpi_maybe_shared_deps = [], visibility = None, export_symbols=None, **kwargs):
+    deps = standard_deps + wpi_maybe_shared_deps
     cc_library(name = name, deps = deps, visibility=visibility, **kwargs)
 
     native.alias(name = name + ".static", actual = name, visibility=visibility)
