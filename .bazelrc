@@ -1,8 +1,8 @@
-# try-import %workspace%/user.bazelrc
-# 
+try-import %workspace%/user.bazelrc
+
 build --java_language_version=11
 build --incompatible_enable_cc_toolchain_resolution
-# test --test_output=errors
+test --test_output=errors
 # 
 import shared/bazel/rc/buildbuddy.rc
 import shared/bazel/compiler_flags/sanitizers.rc
