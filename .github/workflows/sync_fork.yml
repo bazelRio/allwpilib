@@ -14,5 +14,6 @@ jobs:
       - uses: tgymnich/fork-sync@v1.8
         with:
           owner: bazelRio
-          base: master
-          head: master
+          base: main
+          head: main
+          auto_merge: false
