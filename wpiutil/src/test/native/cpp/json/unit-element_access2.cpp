@@ -32,11 +32,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "gtest/gtest.h"
-
 #include "unit-json.h"
 
 #include <cmath>
+
+#include <gtest/gtest.h>
 
 using wpi::json;
 
@@ -568,14 +568,18 @@ TEST_F(JsonElementObjectRemoveTest, Key)
 }
 
 // erase(begin())
-TEST_F(JsonElementObjectRemoveTest, Begin)
+// Disabled because iteration order isn't guaranteed by the underlying map
+// container
+TEST_F(JsonElementObjectRemoveTest, DISABLED_Begin)
 {
     json jobject = {{"a", "a"}, {"b", 1}, {"c", 17u}};
     jobject.erase(jobject.begin());
     EXPECT_EQ(jobject, json({{"b", 1}, {"c", 17u}}));
 }
 
-TEST_F(JsonElementObjectRemoveTest, BeginConst)
+// Disabled because iteration order isn't guaranteed by the underlying map
+// container
+TEST_F(JsonElementObjectRemoveTest, DISABLED_BeginConst)
 {
     json jobject = {{"a", "a"}, {"b", 1}, {"c", 17u}};
     jobject.erase(jobject.cbegin());

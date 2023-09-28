@@ -5,7 +5,7 @@
 #include "glass/networktables/NetworkTables.h"
 
 #include <cinttypes>
-#include <cstdio>
+#include <concepts>
 #include <cstring>
 #include <initializer_list>
 #include <memory>
@@ -82,9 +82,8 @@ static std::string IntegerArrayToString(std::span<const int64_t> in) {
   return fmt::format("[{:d}]", fmt::join(in, ","));
 }
 
-template <typename T>
+template <std::floating_point T>
 static std::string FloatArrayToString(std::span<const T> in) {
-  static_assert(std::is_same_v<T, float> || std::is_same_v<T, double>);
   return fmt::format("[{:.6f}]", fmt::join(in, ","));
 }
 
@@ -729,9 +728,8 @@ static bool StringToIntegerArray(std::string_view in,
   return true;
 }
 
-template <typename T>
+template <std::floating_point T>
 static bool StringToFloatArray(std::string_view in, std::vector<T>* out) {
-  static_assert(std::is_same_v<T, float> || std::is_same_v<T, double>);
   in = wpi::trim(in);
   if (in.empty()) {
     return false;
@@ -1178,12 +1176,17 @@ static void EmitValueTree(
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     EmitValueName(child.source.get(), child.name.c_str(), child.path.c_str());
+
     ImGui::TableNextColumn();
     if (!child.valueChildren.empty()) {
       char label[64];
-      std::snprintf(label, sizeof(label),
-                    child.valueChildrenMap ? "{...}##v_%s" : "[...]##v_%s",
-                    child.name.c_str());
+      if (child.valueChildrenMap) {
+        wpi::format_to_n_c_str(label, sizeof(label), "{{...}}##v_{}",
+                               child.name);
+      } else {
+        wpi::format_to_n_c_str(label, sizeof(label), "[...]##v_{}", child.name);
+      }
+
       if (TreeNodeEx(label, ImGuiTreeNodeFlags_SpanFullWidth)) {
         EmitValueTree(child.valueChildren, flags);
         TreePop();
@@ -1209,10 +1212,16 @@ static void EmitEntry(NetworkTablesModel* model,
   ImGui::TableNextColumn();
   if (!entry.valueChildren.empty()) {
     auto pos = ImGui::GetCursorPos();
+
     char label[64];
-    std::snprintf(label, sizeof(label),
-                  entry.valueChildrenMap ? "{...}##v_%s" : "[...]##v_%s",
-                  entry.info.name.c_str());
+    if (entry.valueChildrenMap) {
+      wpi::format_to_n_c_str(label, sizeof(label), "{{...}}##v_{}",
+                             entry.info.name.c_str());
+    } else {
+      wpi::format_to_n_c_str(label, sizeof(label), "[...]##v_{}",
+                             entry.info.name.c_str());
+    }
+
     valueChildrenOpen =
         TreeNodeEx(label, ImGuiTreeNodeFlags_SpanFullWidth |
                               ImGuiTreeNodeFlags_AllowItemOverlap);

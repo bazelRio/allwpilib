@@ -6,15 +6,15 @@
 
 #include <array>
 #include <cmath>
+#include <concepts>
 #include <limits>
 #include <random>
-#include <type_traits>
 
+#include <Eigen/Eigenvalues>
+#include <Eigen/QR>
 #include <wpi/SymbolExports.h>
 #include <wpi/deprecated.h>
 
-#include "Eigen/Eigenvalues"
-#include "Eigen/QR"
 #include "frc/EigenCore.h"
 #include "frc/geometry/Pose2d.h"
 
@@ -56,26 +56,37 @@ void WhiteNoiseVectorImpl(Matrix& result, T elem, Ts... elems) {
 template <int States, int Inputs>
 bool IsStabilizableImpl(const Matrixd<States, States>& A,
                         const Matrixd<States, Inputs>& B) {
-  Eigen::EigenSolver<Matrixd<States, States>> es{A};
+  Eigen::EigenSolver<Matrixd<States, States>> es{A, false};
 
-  for (int i = 0; i < States; ++i) {
-    if (es.eigenvalues()[i].real() * es.eigenvalues()[i].real() +
-            es.eigenvalues()[i].imag() * es.eigenvalues()[i].imag() <
-        1) {
+  for (int i = 0; i < A.rows(); ++i) {
+    if (std::norm(es.eigenvalues()[i]) < 1) {
       continue;
     }
 
-    Eigen::Matrix<std::complex<double>, States, States + Inputs> E;
-    E << es.eigenvalues()[i] * Eigen::Matrix<std::complex<double>, States,
-                                             States>::Identity() -
-             A,
-        B;
+    if constexpr (States != Eigen::Dynamic && Inputs != Eigen::Dynamic) {
+      Eigen::Matrix<std::complex<double>, States, States + Inputs> E;
+      E << es.eigenvalues()[i] * Eigen::Matrix<std::complex<double>, States,
+                                               States>::Identity() -
+               A,
+          B;
 
-    Eigen::ColPivHouseholderQR<
-        Eigen::Matrix<std::complex<double>, States, States + Inputs>>
-        qr{E};
-    if (qr.rank() < States) {
-      return false;
+      Eigen::ColPivHouseholderQR<
+          Eigen::Matrix<std::complex<double>, States, States + Inputs>>
+          qr{E};
+      if (qr.rank() < States) {
+        return false;
+      }
+    } else {
+      Eigen::MatrixXcd E{A.rows(), A.rows() + B.cols()};
+      E << es.eigenvalues()[i] *
+                   Eigen::MatrixXcd::Identity(A.rows(), A.rows()) -
+               A,
+          B;
+
+      Eigen::ColPivHouseholderQR<Eigen::MatrixXcd> qr{E};
+      if (qr.rank() < A.rows()) {
+        return false;
+      }
     }
   }
   return true;
@@ -96,8 +107,7 @@ bool IsStabilizableImpl(const Matrixd<States, States>& A,
  *                   of the control inputs from no actuation.
  * @return State excursion or control effort cost matrix.
  */
-template <typename... Ts, typename = std::enable_if_t<
-                              std::conjunction_v<std::is_same<double, Ts>...>>>
+template <std::same_as<double>... Ts>
 Matrixd<sizeof...(Ts), sizeof...(Ts)> MakeCostMatrix(Ts... tolerances) {
   Eigen::DiagonalMatrix<double, sizeof...(Ts)> result;
   detail::CostMatrixImpl(result.diagonal(), tolerances...);
@@ -116,8 +126,7 @@ Matrixd<sizeof...(Ts), sizeof...(Ts)> MakeCostMatrix(Ts... tolerances) {
  *                output measurement.
  * @return Process noise or measurement noise covariance matrix.
  */
-template <typename... Ts, typename = std::enable_if_t<
-                              std::conjunction_v<std::is_same<double, Ts>...>>>
+template <std::same_as<double>... Ts>
 Matrixd<sizeof...(Ts), sizeof...(Ts)> MakeCovMatrix(Ts... stdDevs) {
   Eigen::DiagonalMatrix<double, sizeof...(Ts)> result;
   detail::CovMatrixImpl(result.diagonal(), stdDevs...);
@@ -173,8 +182,7 @@ Matrixd<N, N> MakeCovMatrix(const std::array<double, N>& stdDevs) {
   return result;
 }
 
-template <typename... Ts, typename = std::enable_if_t<
-                              std::conjunction_v<std::is_same<double, Ts>...>>>
+template <std::same_as<double>... Ts>
 Matrixd<sizeof...(Ts), 1> MakeWhiteNoiseVector(Ts... stdDevs) {
   Matrixd<sizeof...(Ts), 1> result;
   detail::WhiteNoiseVectorImpl(result, stdDevs...);
@@ -216,7 +224,7 @@ Vectord<N> MakeWhiteNoiseVector(const std::array<double, N>& stdDevs) {
  * @return The vector.
  */
 WPILIB_DLLEXPORT
-Vectord<3> PoseTo3dVector(const Pose2d& pose);
+Eigen::Vector3d PoseTo3dVector(const Pose2d& pose);
 
 /**
  * Converts a Pose2d into a vector of [x, y, std::cos(theta), std::sin(theta)].
@@ -226,7 +234,7 @@ Vectord<3> PoseTo3dVector(const Pose2d& pose);
  * @return The vector.
  */
 WPILIB_DLLEXPORT
-Vectord<4> PoseTo4dVector(const Pose2d& pose);
+Eigen::Vector4d PoseTo4dVector(const Pose2d& pose);
 
 /**
  * Returns true if (A, B) is a stabilizable pair.
@@ -277,6 +285,12 @@ template <>
 WPILIB_DLLEXPORT bool IsStabilizable<2, 1>(const Matrixd<2, 2>& A,
                                            const Matrixd<2, 1>& B);
 
+// Template specializations are used here to make common state-input pairs
+// compile faster.
+template <>
+WPILIB_DLLEXPORT bool IsStabilizable<Eigen::Dynamic, Eigen::Dynamic>(
+    const Eigen::MatrixXd& A, const Eigen::MatrixXd& B);
+
 /**
  * Converts a Pose2d into a vector of [x, y, theta].
  *
@@ -285,7 +299,7 @@ WPILIB_DLLEXPORT bool IsStabilizable<2, 1>(const Matrixd<2, 2>& A,
  * @return The vector.
  */
 WPILIB_DLLEXPORT
-Vectord<3> PoseToVector(const Pose2d& pose);
+Eigen::Vector3d PoseToVector(const Pose2d& pose);
 
 /**
  * Clamps input vector between system's minimum and maximum allowable input.

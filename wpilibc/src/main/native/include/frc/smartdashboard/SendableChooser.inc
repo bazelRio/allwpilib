@@ -5,6 +5,7 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -18,17 +19,20 @@
 namespace frc {
 
 template <class T>
+  requires std::copy_constructible<T> && std::default_initializable<T>
 void SendableChooser<T>::AddOption(std::string_view name, T object) {
   m_choices[name] = std::move(object);
 }
 
 template <class T>
+  requires std::copy_constructible<T> && std::default_initializable<T>
 void SendableChooser<T>::SetDefaultOption(std::string_view name, T object) {
   m_defaultChoice = name;
   AddOption(name, std::move(object));
 }
 
 template <class T>
+  requires std::copy_constructible<T> && std::default_initializable<T>
 auto SendableChooser<T>::GetSelected()
     -> decltype(_unwrap_smart_ptr(m_choices[""])) {
   std::string selected = m_defaultChoice;
@@ -46,6 +50,14 @@ auto SendableChooser<T>::GetSelected()
 }
 
 template <class T>
+  requires std::copy_constructible<T> && std::default_initializable<T>
+void SendableChooser<T>::OnChange(std::function<void(T)> listener) {
+  std::scoped_lock lock(m_mutex);
+  m_listener = listener;
+}
+
+template <class T>
+  requires std::copy_constructible<T> && std::default_initializable<T>
 void SendableChooser<T>::InitSendable(nt::NTSendableBuilder& builder) {
   builder.SetSmartDashboardType("String Chooser");
   {
@@ -91,28 +103,43 @@ void SendableChooser<T>::InitSendable(nt::NTSendableBuilder& builder) {
       nullptr);
   builder.AddStringProperty(kSelected, nullptr,
                             [=, this](std::string_view val) {
-                              std::scoped_lock lock(m_mutex);
-                              m_haveSelected = true;
-                              m_selected = val;
-                              for (auto& pub : m_activePubs) {
-                                pub.Set(val);
+                              T choice{};
+                              std::function<void(T)> listener;
+                              {
+                                std::scoped_lock lock(m_mutex);
+                                m_haveSelected = true;
+                                m_selected = val;
+                                for (auto& pub : m_activePubs) {
+                                  pub.Set(val);
+                                }
+                                if (m_previousVal != val && m_listener) {
+                                  choice = m_choices[val];
+                                  listener = m_listener;
+                                }
+                                m_previousVal = val;
+                              }
+                              if (listener) {
+                                listener(choice);
                               }
                             });
 }
 
 template <class T>
+  requires std::copy_constructible<T> && std::default_initializable<T>
 template <class U>
 U SendableChooser<T>::_unwrap_smart_ptr(const U& value) {
   return value;
 }
 
 template <class T>
+  requires std::copy_constructible<T> && std::default_initializable<T>
 template <class U>
 U* SendableChooser<T>::_unwrap_smart_ptr(const std::unique_ptr<U>& value) {
   return value.get();
 }
 
 template <class T>
+  requires std::copy_constructible<T> && std::default_initializable<T>
 template <class U>
 std::weak_ptr<U> SendableChooser<T>::_unwrap_smart_ptr(
     const std::shared_ptr<U>& value) {

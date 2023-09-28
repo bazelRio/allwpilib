@@ -30,8 +30,8 @@ includeOtherLibs {
   ^Eigen/
   ^cameraserver/
   ^cscore
-  ^drake/
   ^fmt/
+  ^gtest/
   ^hal/
   ^imgui
   ^implot

@@ -3,8 +3,14 @@ project(wpimath)
 include(SubDirList)
 include(CompileWarnings)
 include(AddTest)
+include(DownloadAndCheck)
 
-file(GLOB wpimath_jni_src src/main/native/cpp/jni/WPIMathJNI.cpp)
+file(GLOB wpimath_jni_src src/main/native/cpp/jni/WPIMathJNI_DARE.cpp
+                          src/main/native/cpp/jni/WPIMathJNI_Eigen.cpp
+                          src/main/native/cpp/jni/WPIMathJNI_Exceptions.cpp
+                          src/main/native/cpp/jni/WPIMathJNI_Pose3d.cpp
+                          src/main/native/cpp/jni/WPIMathJNI_StateSpaceUtil.cpp
+                          src/main/native/cpp/jni/WPIMathJNI_Trajectory.cpp)
 
 # Java bindings
 if (WITH_JAVA)
@@ -13,26 +19,26 @@ if (WITH_JAVA)
   include(UseJava)
   set(CMAKE_JAVA_COMPILE_FLAGS "-encoding" "UTF8" "-Xlint:unchecked")
 
-  if(NOT EXISTS "${WPILIB_BINARY_DIR}/wpimath/thirdparty/ejml/ejml-simple-0.41.jar")
+  if(NOT EXISTS "${WPILIB_BINARY_DIR}/wpimath/thirdparty/ejml/ejml-simple-0.42.jar")
       set(BASE_URL "https://search.maven.org/remotecontent?filepath=")
       set(JAR_ROOT "${WPILIB_BINARY_DIR}/wpimath/thirdparty/ejml")
 
       message(STATUS "Downloading EJML jarfiles...")
 
-      file(DOWNLOAD "${BASE_URL}org/ejml/ejml-cdense/0.41/ejml-cdense-0.41.jar"
-          "${JAR_ROOT}/ejml-cdense-0.41.jar")
-      file(DOWNLOAD "${BASE_URL}org/ejml/ejml-core/0.41/ejml-core-0.41.jar"
-          "${JAR_ROOT}/ejml-core-0.41.jar")
-      file(DOWNLOAD "${BASE_URL}org/ejml/ejml-ddense/0.41/ejml-ddense-0.41.jar"
-          "${JAR_ROOT}/ejml-ddense-0.41.jar")
-      file(DOWNLOAD "${BASE_URL}org/ejml/ejml-dsparse/0.41/ejml-dsparse-0.41.jar"
-          "${JAR_ROOT}/ejml-dsparse-0.41.jar")
-      file(DOWNLOAD "${BASE_URL}org/ejml/ejml-fdense/0.41/ejml-fdense-0.41.jar"
-          "${JAR_ROOT}/ejml-fdense-0.41.jar")
-      file(DOWNLOAD "${BASE_URL}org/ejml/ejml-simple/0.41/ejml-simple-0.41.jar"
-          "${JAR_ROOT}/ejml-simple-0.41.jar")
-      file(DOWNLOAD "${BASE_URL}org/ejml/ejml-zdense/0.41/ejml-zdense-0.41.jar"
-          "${JAR_ROOT}/ejml-zdense-0.41.jar")
+      download_and_check("${BASE_URL}org/ejml/ejml-cdense/0.42/ejml-cdense-0.42.jar"
+          "${JAR_ROOT}/ejml-cdense-0.42.jar")
+      download_and_check("${BASE_URL}org/ejml/ejml-core/0.42/ejml-core-0.42.jar"
+          "${JAR_ROOT}/ejml-core-0.42.jar")
+      download_and_check("${BASE_URL}org/ejml/ejml-ddense/0.42/ejml-ddense-0.42.jar"
+          "${JAR_ROOT}/ejml-ddense-0.42.jar")
+      download_and_check("${BASE_URL}org/ejml/ejml-dsparse/0.42/ejml-dsparse-0.42.jar"
+          "${JAR_ROOT}/ejml-dsparse-0.42.jar")
+      download_and_check("${BASE_URL}org/ejml/ejml-fdense/0.42/ejml-fdense-0.42.jar"
+          "${JAR_ROOT}/ejml-fdense-0.42.jar")
+      download_and_check("${BASE_URL}org/ejml/ejml-simple/0.42/ejml-simple-0.42.jar"
+          "${JAR_ROOT}/ejml-simple-0.42.jar")
+      download_and_check("${BASE_URL}org/ejml/ejml-zdense/0.42/ejml-zdense-0.42.jar"
+          "${JAR_ROOT}/ejml-zdense-0.42.jar")
 
       message(STATUS "All files downloaded.")
   endif()
@@ -55,12 +61,7 @@ if (WITH_JAVA)
 
   file(GLOB_RECURSE JAVA_SOURCES src/main/java/*.java ${WPILIB_BINARY_DIR}/wpimath/generated/*.java)
 
-  if(${CMAKE_VERSION} VERSION_LESS "3.11.0")
-    set(CMAKE_JAVA_COMPILE_FLAGS "-h" "${CMAKE_CURRENT_BINARY_DIR}/jniheaders")
-    add_jar(wpimath_jar ${JAVA_SOURCES} INCLUDE_JARS ${EJML_JARS} wpiutil_jar OUTPUT_NAME wpimath)
-  else()
-    add_jar(wpimath_jar ${JAVA_SOURCES} INCLUDE_JARS ${EJML_JARS} wpiutil_jar OUTPUT_NAME wpimath GENERATE_NATIVE_HEADERS wpimath_jni_headers)
-  endif()
+  add_jar(wpimath_jar ${JAVA_SOURCES} INCLUDE_JARS ${EJML_JARS} wpiutil_jar OUTPUT_NAME wpimath GENERATE_NATIVE_HEADERS wpimath_jni_headers)
 
   get_property(WPIMATH_JAR_FILE TARGET wpimath_jar PROPERTY JAR_FILE)
   install(FILES ${WPIMATH_JAR_FILE} DESTINATION "${java_lib_dest}")
@@ -73,24 +74,14 @@ if (WITH_JAVA)
 
   set_property(TARGET wpimathjni PROPERTY FOLDER "libraries")
 
-  if(${CMAKE_VERSION} VERSION_LESS "3.11.0")
-    target_include_directories(wpimathjni PRIVATE ${JNI_INCLUDE_DIRS})
-    target_include_directories(wpimathjni PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/jniheaders")
-  else()
-    target_link_libraries(wpimathjni PRIVATE wpimath_jni_headers)
-  endif()
+  target_link_libraries(wpimathjni PRIVATE wpimath_jni_headers)
   add_dependencies(wpimathjni wpimath_jar)
 
-  if (MSVC)
-    install(TARGETS wpimathjni RUNTIME DESTINATION "${jni_lib_dest}" COMPONENT Runtime)
-  endif()
-
-  install(TARGETS wpimathjni EXPORT wpimathjni DESTINATION "${main_lib_dest}")
+  install(TARGETS wpimathjni EXPORT wpimathjni)
 
 endif()
 
-file(GLOB_RECURSE wpimath_native_src src/main/native/cpp/*.cpp
-                                     src/main/native/thirdparty/drake/src/*.cpp)
+file(GLOB_RECURSE wpimath_native_src src/main/native/cpp/*.cpp)
 list(REMOVE_ITEM wpimath_native_src ${wpimath_jni_src})
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
@@ -118,10 +109,6 @@ else()
     target_link_libraries (wpimath Eigen3::Eigen)
 endif()
 
-install(DIRECTORY src/main/native/thirdparty/drake/include/ DESTINATION "${include_dest}/wpimath")
-target_include_directories(wpimath SYSTEM PUBLIC
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/thirdparty/drake/include>)
-
 install(DIRECTORY src/main/native/thirdparty/gcem/include/ DESTINATION "${include_dest}/wpimath")
 target_include_directories(wpimath SYSTEM PUBLIC
                           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/thirdparty/gcem/include>)
@@ -131,11 +118,7 @@ target_include_directories(wpimath PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/include>
                             $<INSTALL_INTERFACE:${include_dest}/wpimath>)
 
-install(TARGETS wpimath EXPORT wpimath DESTINATION "${main_lib_dest}")
-
-if (WITH_JAVA AND MSVC)
-    install(TARGETS wpimath RUNTIME DESTINATION "${jni_lib_dest}" COMPONENT Runtime)
-endif()
+install(TARGETS wpimath EXPORT wpimath)
 
 if (WITH_FLAT_INSTALL)
     set (wpimath_config_dir ${wpilib_dest})

@@ -4,6 +4,8 @@
 
 #include "frc/DataLogManager.h"
 
+#include <frc/Errors.h>
+
 #include <algorithm>
 #include <ctime>
 #include <random>
@@ -19,6 +21,7 @@
 
 #include "frc/DriverStation.h"
 #include "frc/Filesystem.h"
+#include "frc/RobotBase.h"
 
 using namespace frc;
 
@@ -66,6 +69,11 @@ static std::string MakeLogDir(std::string_view dir) {
   if (!ec && fs::is_directory(s) &&
       (s.permissions() & fs::perms::others_write) != fs::perms::none) {
     return std::string{usbDir};
+  }
+  if (frc::RobotBase::GetRuntimeType() == kRoboRIO) {
+    FRC_ReportError(warn::Warning,
+                    "DataLogManager: Logging to RoboRIO 1 internal storage is "
+                    "not recommended! Plug in a FAT32 formatted flash drive!");
   }
 #endif
   return frc::filesystem::GetOperatingDirectory();
@@ -129,6 +137,8 @@ void Thread::Main() {
         }
         auto size = entry.file_size();
         if (fs::remove(entry.path(), ec)) {
+          FRC_ReportError(warn::Warning, "DataLogManager: Deleted {}",
+                          entry.path().string());
           freeSpace += size;
           if (freeSpace >= kFreeSpaceThreshold) {
             break;
@@ -138,6 +148,13 @@ void Thread::Main() {
                      entry.path().string());
         }
       }
+    } else if (freeSpace < 2 * kFreeSpaceThreshold) {
+      FRC_ReportError(
+          warn::Warning,
+          "DataLogManager: Log storage device has {} MB of free space "
+          "remaining! Logs will get deleted below {} MB of free space. "
+          "Consider deleting logs off the storage device.",
+          freeSpace / 1000000, kFreeSpaceThreshold / 1000000);
     }
   }
 

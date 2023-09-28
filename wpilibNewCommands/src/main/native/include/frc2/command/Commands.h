@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <functional>
 #include <initializer_list>
 #include <memory>
@@ -30,6 +31,14 @@ namespace cmd {
 [[nodiscard]]
 CommandPtr None();
 
+/**
+ * Constructs a command that does nothing until interrupted.
+ *
+ * @return the command
+ */
+[[nodiscard]]
+CommandPtr Idle();
+
 // Action Commands
 
 /**
@@ -40,17 +49,7 @@ CommandPtr None();
  */
 [[nodiscard]]
 CommandPtr RunOnce(std::function<void()> action,
-                   std::initializer_list<Subsystem*> requirements);
-
-/**
- * Constructs a command that runs an action once and finishes.
- *
- * @param action the action to run
- * @param requirements subsystems the action requires
- */
-[[nodiscard]]
-CommandPtr RunOnce(std::function<void()> action,
-                   std::span<Subsystem* const> requirements = {});
+                   Requirements requirements = {});
 
 /**
  * Constructs a command that runs an action every iteration until interrupted.
@@ -59,18 +58,7 @@ CommandPtr RunOnce(std::function<void()> action,
  * @param requirements subsystems the action requires
  */
 [[nodiscard]]
-CommandPtr Run(std::function<void()> action,
-               std::initializer_list<Subsystem*> requirements);
-
-/**
- * Constructs a command that runs an action every iteration until interrupted.
- *
- * @param action the action to run
- * @param requirements subsystems the action requires
- */
-[[nodiscard]]
-CommandPtr Run(std::function<void()> action,
-               std::span<Subsystem* const> requirements = {});
+CommandPtr Run(std::function<void()> action, Requirements requirements = {});
 
 /**
  * Constructs a command that runs an action once and another action when the
@@ -82,19 +70,7 @@ CommandPtr Run(std::function<void()> action,
  */
 [[nodiscard]]
 CommandPtr StartEnd(std::function<void()> start, std::function<void()> end,
-                    std::initializer_list<Subsystem*> requirements);
-
-/**
- * Constructs a command that runs an action once and another action when the
- * command is interrupted.
- *
- * @param start the action to run on start
- * @param end the action to run on interrupt
- * @param requirements subsystems the action requires
- */
-[[nodiscard]]
-CommandPtr StartEnd(std::function<void()> start, std::function<void()> end,
-                    std::span<Subsystem* const> requirements = {});
+                    Requirements requirements = {});
 
 /**
  * Constructs a command that runs an action every iteration until interrupted,
@@ -106,19 +82,7 @@ CommandPtr StartEnd(std::function<void()> start, std::function<void()> end,
  */
 [[nodiscard]]
 CommandPtr RunEnd(std::function<void()> run, std::function<void()> end,
-                  std::initializer_list<Subsystem*> requirements);
-
-/**
- * Constructs a command that runs an action every iteration until interrupted,
- * and then runs a second action.
- *
- * @param run the action to run every iteration
- * @param end the action to run on interrupt
- * @param requirements subsystems the action requires
- */
-[[nodiscard]]
-CommandPtr RunEnd(std::function<void()> run, std::function<void()> end,
-                  std::span<Subsystem* const> requirements = {});
+                  Requirements requirements = {});
 
 /**
  * Constructs a command that prints a message and finishes.
@@ -166,10 +130,10 @@ CommandPtr Either(CommandPtr&& onTrue, CommandPtr&& onFalse,
  * @param selector the selector function
  * @param commands map of commands to select from
  */
-template <typename Key, class... Types>
+template <typename Key, std::convertible_to<CommandPtr>... CommandPtrs>
 [[nodiscard]]
 CommandPtr Select(std::function<Key()> selector,
-                  std::pair<Key, Types>&&... commands) {
+                  std::pair<Key, CommandPtrs>&&... commands) {
   std::vector<std::pair<Key, std::unique_ptr<Command>>> vec;
 
   ((void)vec.emplace_back(commands.first, std::move(commands.second).Unwrap()),
@@ -178,6 +142,26 @@ CommandPtr Select(std::function<Key()> selector,
   return SelectCommand(std::move(selector), std::move(vec)).ToPtr();
 }
 
+/**
+ * Constructs a command that schedules the command returned from the supplier
+ * when initialized, and ends when it is no longer scheduled. The supplier is
+ * called when the command is initialized.
+ *
+ * @param supplier the command supplier
+ */
+[[nodiscard]]
+CommandPtr DeferredProxy(wpi::unique_function<Command*()> supplier);
+
+/**
+ * Constructs a command that schedules the command returned from the supplier
+ * when initialized, and ends when it is no longer scheduled. The supplier is
+ * called when the command is initialized.
+ *
+ * @param supplier the command supplier
+ */
+[[nodiscard]]
+CommandPtr DeferredProxy(wpi::unique_function<CommandPtr()> supplier);
+
 // Command Groups
 
 namespace impl {
@@ -185,7 +169,7 @@ namespace impl {
 /**
  * Create a vector of commands.
  */
-template <typename... Args>
+template <std::convertible_to<CommandPtr>... Args>
 std::vector<CommandPtr> MakeVector(Args&&... args) {
   std::vector<CommandPtr> data;
   data.reserve(sizeof...(Args));
@@ -204,10 +188,10 @@ CommandPtr Sequence(std::vector<CommandPtr>&& commands);
 /**
  * Runs a group of commands in series, one after the other.
  */
-template <typename... Args>
+template <std::convertible_to<CommandPtr>... CommandPtrs>
 [[nodiscard]]
-CommandPtr Sequence(Args&&... commands) {
-  return Sequence(impl::MakeVector(std::forward<Args>(commands)...));
+CommandPtr Sequence(CommandPtrs&&... commands) {
+  return Sequence(impl::MakeVector(std::forward<CommandPtrs>(commands)...));
 }
 
 /**
@@ -221,10 +205,11 @@ CommandPtr RepeatingSequence(std::vector<CommandPtr>&& commands);
  * Runs a group of commands in series, one after the other. Once the last
  * command ends, the group is restarted.
  */
-template <typename... Args>
+template <std::convertible_to<CommandPtr>... CommandPtrs>
 [[nodiscard]]
-CommandPtr RepeatingSequence(Args&&... commands) {
-  return RepeatingSequence(impl::MakeVector(std::forward<Args>(commands)...));
+CommandPtr RepeatingSequence(CommandPtrs&&... commands) {
+  return RepeatingSequence(
+      impl::MakeVector(std::forward<CommandPtrs>(commands)...));
 }
 
 /**
@@ -238,10 +223,10 @@ CommandPtr Parallel(std::vector<CommandPtr>&& commands);
  * Runs a group of commands at the same time. Ends once all commands in the
  * group finish.
  */
-template <typename... Args>
+template <std::convertible_to<CommandPtr>... CommandPtrs>
 [[nodiscard]]
-CommandPtr Parallel(Args&&... commands) {
-  return Parallel(impl::MakeVector(std::forward<Args>(commands)...));
+CommandPtr Parallel(CommandPtrs&&... commands) {
+  return Parallel(impl::MakeVector(std::forward<CommandPtrs>(commands)...));
 }
 
 /**
@@ -255,10 +240,10 @@ CommandPtr Race(std::vector<CommandPtr>&& commands);
  * Runs a group of commands at the same time. Ends once any command in the group
  * finishes, and cancels the others.
  */
-template <typename... Args>
+template <std::convertible_to<CommandPtr>... CommandPtrs>
 [[nodiscard]]
-CommandPtr Race(Args&&... commands) {
-  return Race(impl::MakeVector(std::forward<Args>(commands)...));
+CommandPtr Race(CommandPtrs&&... commands) {
+  return Race(impl::MakeVector(std::forward<CommandPtrs>(commands)...));
 }
 
 /**
@@ -272,11 +257,11 @@ CommandPtr Deadline(CommandPtr&& deadline, std::vector<CommandPtr>&& others);
  * Runs a group of commands at the same time. Ends once a specific command
  * finishes, and cancels the others.
  */
-template <typename... Args>
+template <std::convertible_to<CommandPtr>... CommandPtrs>
 [[nodiscard]]
-CommandPtr Deadline(CommandPtr&& deadline, Args&&... commands) {
+CommandPtr Deadline(CommandPtr&& deadline, CommandPtrs&&... commands) {
   return Deadline(std::move(deadline),
-                  impl::MakeVector(std::forward<Args>(commands)...));
+                  impl::MakeVector(std::forward<CommandPtrs>(commands)...));
 }
 
 }  // namespace cmd

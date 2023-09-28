@@ -11,9 +11,14 @@ if ("${CMAKE_HOST_SYSTEM_NAME}" STREQUAL "Windows")
     set(CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION 10.0.18362.0 CACHE STRING INTERNAL FORCE)
 endif()
 
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.11)
 project(allwpilib)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+
+# Make timestamps of extracted files from FetchContent the time of extraction
+if (POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
 
 message(STATUS "Platform version: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 
@@ -79,11 +84,6 @@ set(OPENCV_JAVA_INSTALL_DIR "" CACHE PATH "Location to search for the OpenCV jar
 # are performed, but debug info still exists).
 if (NOT CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "" FORCE)
-endif()
-
-# We always want flat install with MSVC.
-if (MSVC)
-  set(WITH_FLAT_INSTALL ON)
 endif()
 
 if (WITH_JAVA AND NOT BUILD_SHARED_LIBS)
@@ -155,7 +155,6 @@ endif()
 
 set( wpilib_dest "")
 set( include_dest include )
-set( main_lib_dest lib )
 set( java_lib_dest java )
 set( jni_lib_dest jni )
 
@@ -167,8 +166,7 @@ endif()
 
 if (USE_SYSTEM_LIBUV)
 set (LIBUV_SYSTEM_REPLACE "
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(libuv REQUIRED IMPORTED_TARGET libuv)
+find_dependency(libuv CONFIG)
 ")
 endif()
 
@@ -319,6 +317,8 @@ if (WITH_WPILIB)
     add_subdirectory(wpilibj)
     add_subdirectory(wpilibc)
     add_subdirectory(wpilibNewCommands)
+    add_subdirectory(romiVendordep)
+    add_subdirectory(xrpVendordep)
     if (WITH_EXAMPLES)
         add_subdirectory(wpilibcExamples)
     endif()

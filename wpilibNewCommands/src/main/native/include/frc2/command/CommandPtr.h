@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <functional>
 #include <initializer_list>
 #include <memory>
@@ -12,7 +13,7 @@
 #include <utility>
 #include <vector>
 
-#include "frc2/command/CommandBase.h"
+#include "frc2/command/Command.h"
 
 namespace frc2 {
 /**
@@ -27,14 +28,14 @@ namespace frc2 {
  */
 class CommandPtr final {
  public:
-  explicit CommandPtr(std::unique_ptr<CommandBase>&& command)
+  explicit CommandPtr(std::unique_ptr<Command>&& command)
       : m_ptr(std::move(command)) {}
 
-  template <class T, typename = std::enable_if_t<std::is_base_of_v<
-                         Command, std::remove_reference_t<T>>>>
+  template <std::derived_from<Command> T>
+  // NOLINTNEXTLINE(bugprone-forwarding-reference-overload)
   explicit CommandPtr(T&& command)
-      : CommandPtr(std::make_unique<std::remove_reference_t<T>>(
-            std::forward<T>(command))) {}
+      : CommandPtr(
+            std::make_unique<std::decay_t<T>>(std::forward<T>(command))) {}
 
   CommandPtr(CommandPtr&&) = default;
   CommandPtr& operator=(CommandPtr&&) = default;
@@ -62,16 +63,16 @@ class CommandPtr final {
   /**
    * Decorates this command to run or stop when disabled.
    *
-   * @param doesRunWhenDisabled true to run when disabled.
+   * @param doesRunWhenDisabled true to run when disabled
    * @return the decorated command
    */
   [[nodiscard]]
   CommandPtr IgnoringDisable(bool doesRunWhenDisabled) &&;
 
   /**
-   * Decorates this command to run or stop when disabled.
+   * Decorates this command to have a different interrupt behavior.
    *
-   * @param interruptBehavior true to run when disabled.
+   * @param interruptBehavior the desired interrupt behavior
    * @return the decorated command
    */
   [[nodiscard]]
@@ -87,18 +88,7 @@ class CommandPtr final {
    */
   [[nodiscard]]
   CommandPtr AndThen(std::function<void()> toRun,
-                     std::span<Subsystem* const> requirements = {}) &&;
-
-  /**
-   * Decorates this command with a runnable to run after the command finishes.
-   *
-   * @param toRun the Runnable to run
-   * @param requirements the required subsystems
-   * @return the decorated command
-   */
-  [[nodiscard]]
-  CommandPtr AndThen(std::function<void()> toRun,
-                     std::initializer_list<Subsystem*> requirements) &&;
+                     Requirements requirements = {}) &&;
 
   /**
    * Decorates this command with a set of commands to run after it in sequence.
@@ -120,18 +110,7 @@ class CommandPtr final {
    */
   [[nodiscard]]
   CommandPtr BeforeStarting(std::function<void()> toRun,
-                            std::initializer_list<Subsystem*> requirements) &&;
-
-  /**
-   * Decorates this command with a runnable to run before this command starts.
-   *
-   * @param toRun the Runnable to run
-   * @param requirements the required subsystems
-   * @return the decorated command
-   */
-  [[nodiscard]]
-  CommandPtr BeforeStarting(std::function<void()> toRun,
-                            std::span<Subsystem* const> requirements = {}) &&;
+                            Requirements requirements = {}) &&;
 
   /**
    * Decorates this command with another command to run before this command
@@ -144,10 +123,9 @@ class CommandPtr final {
   CommandPtr BeforeStarting(CommandPtr&& before) &&;
 
   /**
-   * Decorates this command with a timeout.  If the specified timeout is
+   * Decorates this command with a timeout. If the specified timeout is
    * exceeded before the command finishes normally, the command will be
-   * interrupted and un-scheduled.  Note that the timeout only applies to the
-   * command returned by this method; the calling command is not itself changed.
+   * interrupted and un-scheduled.
    *
    * @param duration the timeout duration
    * @return the command with the timeout added
@@ -156,10 +134,9 @@ class CommandPtr final {
   CommandPtr WithTimeout(units::second_t duration) &&;
 
   /**
-   * Decorates this command with an interrupt condition.  If the specified
+   * Decorates this command with an interrupt condition. If the specified
    * condition becomes true before the command finishes normally, the command
-   * will be interrupted and un-scheduled. Note that this only applies to the
-   * command returned by this method; the calling command is not itself changed.
+   * will be interrupted and un-scheduled.
    *
    * @param condition the interrupt condition
    * @return the command with the interrupt condition added
@@ -168,13 +145,12 @@ class CommandPtr final {
   CommandPtr Until(std::function<bool()> condition) &&;
 
   /**
-   * Decorates this command with a run condition.  If the specified condition
+   * Decorates this command with a run condition. If the specified condition
    * becomes false before the command finishes normally, the command will be
-   * interrupted and un-scheduled. Note that this only applies to the command
-   * returned by this method; the calling command is not itself changed.
+   * interrupted and un-scheduled.
    *
-   * @param condition the interrupt condition
-   * @return the command with the interrupt condition added
+   * @param condition the run condition
+   * @return the command with the run condition added
    */
   [[nodiscard]]
   CommandPtr OnlyWhile(std::function<bool()> condition) &&;
@@ -242,7 +218,7 @@ class CommandPtr final {
    * the command's inherent Command::End(bool) method.
    *
    * @param end a lambda accepting a boolean parameter specifying whether the
-   * command was interrupted.
+   * command was interrupted
    * @return the decorated command
    */
   [[nodiscard]]
@@ -271,15 +247,15 @@ class CommandPtr final {
   /**
    * Get a raw pointer to the held command.
    */
-  CommandBase* get() const&;
+  Command* get() const&;
 
   // Prevent calls on a temporary, as the returned pointer would be invalid
-  CommandBase* get() && = delete;
+  Command* get() && = delete;
 
   /**
    * Convert to the underlying unique_ptr.
    */
-  std::unique_ptr<CommandBase> Unwrap() &&;
+  std::unique_ptr<Command> Unwrap() &&;
 
   /**
    * Schedules this command.
@@ -338,7 +314,7 @@ class CommandPtr final {
       std::vector<CommandPtr>&& vec);
 
  private:
-  std::unique_ptr<CommandBase> m_ptr;
+  std::unique_ptr<Command> m_ptr;
   void AssertValid() const;
 };
 

@@ -204,8 +204,13 @@ public final class DataLogManager {
       } catch (IOException ex) {
         // ignored
       }
+      if (RobotBase.getRuntimeType() == RuntimeType.kRoboRIO) {
+        DriverStation.reportWarning(
+            "DataLogManager: Logging to RoboRIO 1 internal storage is not recommended!"
+                + " Plug in a FAT32 formatted flash drive!",
+            false);
+      }
     }
-
     return Filesystem.getOperatingDirectory().getAbsolutePath();
   }
 
@@ -257,6 +262,7 @@ public final class DataLogManager {
             }
             long length = file.length();
             if (file.delete()) {
+              DriverStation.reportWarning("DataLogManager: Deleted " + file.getName(), false);
               freeSpace += length;
               if (freeSpace >= kFreeSpaceThreshold) {
                 break;
@@ -266,6 +272,15 @@ public final class DataLogManager {
             }
           }
         }
+      } else if (freeSpace < 2 * kFreeSpaceThreshold) {
+        DriverStation.reportWarning(
+            "DataLogManager: Log storage device has "
+                + freeSpace / 1000000
+                + " MB of free space remaining! Logs will get deleted below "
+                + kFreeSpaceThreshold / 1000000
+                + " MB of free space."
+                + "Consider deleting logs off the storage device.",
+            false);
       }
     }
 

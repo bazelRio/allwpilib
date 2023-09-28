@@ -58,6 +58,7 @@
     "tags": [
       "Hardware",
       "Joystick",
+      "Shuffleboard",
       "Pneumatics"
     ],
     "foldername": "Solenoid",
@@ -685,7 +686,10 @@
     ],
     "foldername": "RomiReference",
     "gradlebase": "cppromi",
-    "commandversion": 2
+    "commandversion": 2,
+    "extravendordeps": [
+      "romi"
+    ]
   },
   {
     "name": "StateSpaceFlywheel",
@@ -862,6 +866,18 @@
       "XboxController"
     ],
     "foldername": "SwerveDrivePoseEstimator",
+    "gradlebase": "cpp",
+    "commandversion": 2
+  },
+  {
+    "name": "Flywheel BangBangController",
+    "description": "A sample program to demonstrate the use of a BangBangController with a flywheel to control RPM",
+    "tags": [
+      "Flywheel",
+      "Simulation",
+      "Joystick"
+    ],
+    "foldername": "FlywheelBangBangController",
     "gradlebase": "cpp",
     "commandversion": 2
   }

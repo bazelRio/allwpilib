@@ -4,20 +4,22 @@
 
 #include <stdint.h>
 
+#include <concepts>
 #include <span>
 #include <string_view>
 #include <vector>
 
+#include <gtest/gtest.h>
+#include <wpi/SpanMatcher.h>
+
 #include "../MockLogger.h"
 #include "../PubSubOptionsMatcher.h"
-#include "../SpanMatcher.h"
 #include "../TestPrinters.h"
 #include "../ValueMatcher.h"
 #include "Handle.h"
 #include "MockNetworkInterface.h"
 #include "MockWireConnection.h"
 #include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "net/Message.h"
 #include "net/ServerImpl.h"
 #include "net/WireEncoder.h"
@@ -31,6 +33,7 @@ using ::testing::Field;
 using ::testing::IsEmpty;
 using ::testing::Property;
 using ::testing::Return;
+using ::testing::StrEq;
 
 using MockSetPeriodicFunc = ::testing::MockFunction<void(uint32_t repeatMs)>;
 using MockConnected3Func =
@@ -99,12 +102,12 @@ static std::vector<uint8_t> EncodeServerBinary(const T& msgs) {
   std::vector<uint8_t> data;
   wpi::raw_uvector_ostream os{data};
   for (auto&& msg : msgs) {
-    if constexpr (std::is_same_v<typename T::value_type, net::ServerMessage>) {
+    if constexpr (std::same_as<typename T::value_type, net::ServerMessage>) {
       if (auto m = std::get_if<net::ServerValueMsg>(&msg.contents)) {
         net::WireEncodeBinary(os, m->topic, m->value.time(), m->value);
       }
-    } else if constexpr (std::is_same_v<typename T::value_type,
-                                        net::ClientMessage>) {
+    } else if constexpr (std::same_as<typename T::value_type,
+                                      net::ClientMessage>) {
       if (auto m = std::get_if<net::ClientValueMsg>(&msg.contents)) {
         net::WireEncodeBinary(os, Handle{m->pubHandle}.GetIndex(),
                               m->value.time(), m->value);
@@ -125,12 +128,15 @@ TEST_F(ServerImplTest, PublishLocal) {
   NT_Topic topicHandle3 = nt::Handle{0, 3, nt::Handle::kTopic};
   {
     ::testing::InSequence seq;
-    EXPECT_CALL(local, NetworkAnnounce("test", "double", wpi::json::object(),
-                                       pubHandle));
-    EXPECT_CALL(local, NetworkAnnounce("test2", "double", wpi::json::object(),
-                                       pubHandle2));
-    EXPECT_CALL(local, NetworkAnnounce("test3", "double", wpi::json::object(),
-                                       pubHandle3));
+    EXPECT_CALL(local, NetworkAnnounce(std::string_view{"test"},
+                                       std::string_view{"double"},
+                                       wpi::json::object(), pubHandle));
+    EXPECT_CALL(local, NetworkAnnounce(std::string_view{"test2"},
+                                       std::string_view{"double"},
+                                       wpi::json::object(), pubHandle2));
+    EXPECT_CALL(local, NetworkAnnounce(std::string_view{"test3"},
+                                       std::string_view{"double"},
+                                       wpi::json::object(), pubHandle3));
   }
 
   {
@@ -156,7 +162,7 @@ TEST_F(ServerImplTest, PublishLocal) {
           "test", 3, "double", std::nullopt, wpi::json::object()}});
       smsgs.emplace_back(net::ServerMessage{net::AnnounceMsg{
           "test2", 8, "double", std::nullopt, wpi::json::object()}});
-      EXPECT_CALL(wire, Text(EncodeText(smsgs)));  // SendControl()
+      EXPECT_CALL(wire, Text(StrEq(EncodeText(smsgs))));  // SendControl()
     }
     EXPECT_CALL(wire, Flush());                         // SendControl()
     EXPECT_CALL(wire, Ready()).WillOnce(Return(true));  // SendControl()
@@ -164,7 +170,7 @@ TEST_F(ServerImplTest, PublishLocal) {
       std::vector<net::ServerMessage> smsgs;
       smsgs.emplace_back(net::ServerMessage{net::AnnounceMsg{
           "test3", 11, "double", std::nullopt, wpi::json::object()}});
-      EXPECT_CALL(wire, Text(EncodeText(smsgs)));  // SendControl()
+      EXPECT_CALL(wire, Text(StrEq(EncodeText(smsgs))));  // SendControl()
     }
     EXPECT_CALL(wire, Flush());  // SendControl()
   }
@@ -205,8 +211,9 @@ TEST_F(ServerImplTest, ClientSubTopicOnlyThenValue) {
   server.SetLocal(&local);
   NT_Publisher pubHandle = nt::Handle{0, 1, nt::Handle::kPublisher};
   NT_Topic topicHandle = nt::Handle{0, 1, nt::Handle::kTopic};
-  EXPECT_CALL(
-      local, NetworkAnnounce("test", "double", wpi::json::object(), pubHandle));
+  EXPECT_CALL(local, NetworkAnnounce(std::string_view{"test"},
+                                     std::string_view{"double"},
+                                     wpi::json::object(), pubHandle));
 
   {
     std::vector<net::ClientMessage> msgs;
@@ -229,7 +236,7 @@ TEST_F(ServerImplTest, ClientSubTopicOnlyThenValue) {
       std::vector<net::ServerMessage> smsgs;
       smsgs.emplace_back(net::ServerMessage{net::AnnounceMsg{
           "test", 3, "double", std::nullopt, wpi::json::object()}});
-      EXPECT_CALL(wire, Text(EncodeText(smsgs)));  // SendValues()
+      EXPECT_CALL(wire, Text(StrEq(EncodeText(smsgs))));  // SendValues()
     }
     EXPECT_CALL(wire, Flush());                         // SendValues()
     EXPECT_CALL(setPeriodic, Call(100));                // ClientSubscribe()
@@ -287,8 +294,9 @@ TEST_F(ServerImplTest, ZeroTimestampNegativeTime) {
   Value value = Value::MakeDouble(5, -10);
   {
     ::testing::InSequence seq;
-    EXPECT_CALL(local, NetworkAnnounce("test", "double", wpi::json::object(),
-                                       pubHandle))
+    EXPECT_CALL(local, NetworkAnnounce(std::string_view{"test"},
+                                       std::string_view{"double"},
+                                       wpi::json::object(), pubHandle))
         .WillOnce(Return(topicHandle));
     EXPECT_CALL(local, NetworkSetValue(topicHandle, defaultValue));
     EXPECT_CALL(local, NetworkSetValue(topicHandle, value));

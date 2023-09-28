@@ -11,7 +11,7 @@
 #include <frc/Notifier.h>
 #include <units/time.h>
 
-#include "frc2/command/CommandBase.h"
+#include "frc2/command/Command.h"
 #include "frc2/command/CommandHelper.h"
 
 namespace frc2 {
@@ -27,7 +27,7 @@ namespace frc2 {
  *
  * This class is provided by the NewCommands VendorDep
  */
-class NotifierCommand : public CommandHelper<CommandBase, NotifierCommand> {
+class NotifierCommand : public CommandHelper<Command, NotifierCommand> {
  public:
   /**
    * Creates a new NotifierCommand.
@@ -37,17 +37,7 @@ class NotifierCommand : public CommandHelper<CommandBase, NotifierCommand> {
    * @param requirements the subsystems required by this command
    */
   NotifierCommand(std::function<void()> toRun, units::second_t period,
-                  std::initializer_list<Subsystem*> requirements);
-
-  /**
-   * Creates a new NotifierCommand.
-   *
-   * @param toRun        the runnable for the notifier to run
-   * @param period       the period at which the notifier should run
-   * @param requirements the subsystems required by this command
-   */
-  NotifierCommand(std::function<void()> toRun, units::second_t period,
-                  std::span<Subsystem* const> requirements = {});
+                  Requirements requirements = {});
 
   NotifierCommand(NotifierCommand&& other);
 
